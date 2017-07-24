@@ -10,8 +10,8 @@ Requires IIS URL Rewrite module: https://www.iis.net/downloads/microsoft/url-rew
 ### HTTP Reponse Headers ###
 
 - Removed:
- - Server
- - X-Powered-By
+  - Server
+  - X-Powered-By
 - Added:
   - Strict-Transport-Security: max-age=31536000; includeSubDomains
   - cache_control: private, max-age=0, no-cache
