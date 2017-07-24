@@ -13,7 +13,7 @@ if ((Test-Path $ssl3ClientPath) -and (Test-Path $ssl3ServerPath) -and (Test-Path
     $tls12ClientEnabled = (Get-ItemProperty -Path $tls12ClientPath -Name "Enabled").Enabled
     $tls12ServerEnabled = (Get-ItemProperty -Path $tls12ServerPath -Name "Enabled").Enabled
 
-    if ($ssl3ClientEnabled -eq 0 -and $ssl3ServerEnabled -eq 0 -and $tls12ClientEnabled -eq 1 -and $tls12ServerEnabled -eq 4294967295)
+    if ($ssl3ClientEnabled -eq 0 -and $ssl3ServerEnabled -eq 0 -and $tls12ClientEnabled -eq 1 -and $tls12ServerEnabled -eq 1)
     {
         Write-Host "Patched!"
     }
