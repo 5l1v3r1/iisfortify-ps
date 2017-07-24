@@ -9,14 +9,16 @@ Requires IIS URL Rewrite module: https://www.iis.net/downloads/microsoft/url-rew
 
 ### HTTP Reponse Headers ###
 
-- 'Server' and 'X-Powered-By' headers removed.
+- Removed:
+ - Server
+ - X-Powered-By
 - Added:
--- Strict-Transport-Security: max-age=31536000; includeSubDomains
--- cache_control: private, max-age=0, no-cache
--- X-Content-Type-Options: nosniff
--- X-XSS-Protection: mode=block
--- X-Frame-Options: SAMEORIGIN
--- X-Download-Options: noopen
+ - Strict-Transport-Security: max-age=31536000; includeSubDomains
+ - cache_control: private, max-age=0, no-cache
+ - X-Content-Type-Options: nosniff
+ - X-XSS-Protection: mode=block
+ - X-Frame-Options: SAMEORIGIN
+ - X-Download-Options: noopen
 
 ### TLS Configuration ###
 
