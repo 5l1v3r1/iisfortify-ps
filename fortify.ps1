@@ -5,6 +5,16 @@
 
 # Logic Flow at Script End
 
+# Apply 'safe' config (maximise client support):
+# $true OR $false
+$safe_config = $true
+#$safe_config = $false
+
+# Configure security response headers:
+# $true OR $false
+#$apply_headers = $true
+$apply_headers = $false
+
 function Restrict-Information {
 	$appcmd = $($env:windir + "\system32\inetsrv\appcmd.exe")
 
@@ -46,7 +56,7 @@ Function Backup-Crypto {
     Remove-Item C:\temp\fortify*.tmp
 }
 
-Function Harden-Crypto {
+Function Harden-Crypto([bool]$safe_config) {
     $os = Get-WmiObject -class Win32_OperatingSystem
 
 	Write-Output 'Configuring IIS with SSL/TLS deployment best practices...'
@@ -77,7 +87,7 @@ Function Harden-Crypto {
 	Write-Output 'SSL 3.0 has been disabled.'
 
 	# Disable TLS 1.0 for client and server SCHANNEL communications (Server 2012 R2+).
-    if ([System.Version]$os.Version -gt [System.Version]'6.3') {
+    if ([System.Version]$os.Version -gt [System.Version]'6.3' -and $safe_config -eq $false) {
 	    New-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server' -Force | Out-Null
 	    New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server' -name 'Enabled' -value 0 -PropertyType 'DWord' -Force | Out-Null
 	    New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server' -name 'DisabledByDefault' -value 1 -PropertyType 'DWord' -Force | Out-Null
@@ -181,7 +191,7 @@ Function Harden-Crypto {
     }
 	 
 	# Set cipher suites order as secure as possible.
-    if ([System.Version]$os.Version -gt [System.Version]'10.0') {
+    if ([System.Version]$os.Version -gt [System.Version]'10.0' -and $safe_config -eq $false) {
         Write-Host "Applying Server 2016 cipher suite configuration..."
 	    $cipherSuitesOrder = @(
           'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384',
@@ -205,7 +215,7 @@ Function Harden-Crypto {
 	    )
     }
 
-    elseif ([System.Version]$os.Version -gt [System.Version]'6.3') {
+    elseif ([System.Version]$os.Version -gt [System.Version]'6.3' -and $safe_config -eq $false) {
         Write-Host "Applying Server 2012 R2 cipher suite configuration..."
 	    $cipherSuitesOrder = @(
 	      'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384_P521',
@@ -292,10 +302,13 @@ Write-Output '* IISFortify-PS beginning... *'
 Write-Output '*                            *'
 Write-Output '******************************'
 
-# Comment out any step that you do not wish to perform.
-Restrict-Information
+if ($apply_headers -eq $true)
+{
+    Restrict-Information
+}
+
 Backup-Crypto
-Harden-Crypto
+Harden-Crypto $safe_config
 
 Write-Output '****************************'
 Write-Output '*                          *'
