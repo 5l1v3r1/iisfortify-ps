@@ -12,23 +12,23 @@ $tls_support = 1
 $apply_headers = $true
 
 function Restrict-Information {
-	$appcmd = $($env:windir + "\system32\inetsrv\appcmd.exe")
+    $appcmd = $(Join-Path $env:windir 'system32\inetsrv\appcmd.exe')
 
-	Write-Output '[*] Removing IIS and ASP.NET server identification...'
-	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/+[name='Remove_RESPONSE_Server']" /commit:apphost
-	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].patternSyntax:`"Wildcard`"" /commit:apphost
-	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].match.serverVariable:RESPONSE_Server" "/[name='Remove_RESPONSE_Server'].match.pattern:`"*`"" /commit:apphost
-	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].action.type:`"Rewrite`"" "/[name='Remove_RESPONSE_Server'].action.value:`" `"" /commit:apphost
+    Write-Output '[*] Removing IIS and ASP.NET server identification...'
+    & $appcmd set config  -section:system.webServer/rewrite/outboundRules "/+[name='Remove_RESPONSE_Server']" /commit:apphost
+    & $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].patternSyntax:`"Wildcard`"" /commit:apphost
+    & $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].match.serverVariable:RESPONSE_Server" "/[name='Remove_RESPONSE_Server'].match.pattern:`"*`"" /commit:apphost
+    & $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].action.type:`"Rewrite`"" "/[name='Remove_RESPONSE_Server'].action.value:`" `"" /commit:apphost
 
-	& $appcmd set config /section:httpProtocol "/-customHeaders.[name='X-Powered-By']"
+    & $appcmd set config /section:httpProtocol "/-customHeaders.[name='X-Powered-By']"
 
-	#HSTS header
-	Write-Output '[*] Configuring HSTS header...'
+    #HSTS header
+    Write-Output '[*] Configuring HSTS header...'
     & $appcmd set config /section:httpProtocol "/+customHeaders.[name='Strict-Transport-Security',value='max-age=31536000; includeSubDomains']"
 
-	# Prevent framejacking.
-	Write-Output '[*] Configuring other Security headers...'
-	& $appcmd set config /section:httpProtocol "/+customHeaders.[name='cache-control',value='private, max-age=0, no-cache']"
+    # Prevent framejacking.
+    Write-Output '[*] Configuring other Security headers...'
+    & $appcmd set config /section:httpProtocol "/+customHeaders.[name='cache-control',value='private, max-age=0, no-cache']"
     & $appcmd set config /section:httpProtocol "/+customHeaders.[name='X-Content-Type-Options',value='nosniff']"
     & $appcmd set config /section:httpProtocol "/+customHeaders.[name='X-XSS-Protection',value='1; mode=block']"
     & $appcmd set config /section:httpProtocol "/+customHeaders.[name='X-Frame-Options',value='SAMEORIGIN']"
@@ -36,7 +36,7 @@ function Restrict-Information {
 }
 
 function Harden-Crypto($protocol_value) {
-	Write-Output '[*] Applying hardened SSL/TLS configuration...'
+    Write-Output '[*] Applying hardened SSL/TLS configuration...'
     
     New-ItemProperty -path 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727' -name SchUseStrongCrypto -value 1 -PropertyType 'DWord' -Force | Out-Null
     New-ItemProperty -path 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319' -name SchUseStrongCrypto -value 1 -PropertyType 'DWord' -Force | Out-Null
